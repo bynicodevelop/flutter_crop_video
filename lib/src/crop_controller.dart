@@ -3,20 +3,24 @@ part of crop;
 /// The controller used to control the rotation, scale and actual cropping.
 class CropController extends ChangeNotifier {
   /// Constructor
-  CropController(
-      {double aspectRatio = 1.0,
-      double scale = 1.0,
-      double rotation = 0,
-      Offset offset = Offset.zero}) {
+  CropController({
+    double aspectRatio = 1.0,
+    double scale = 1.0,
+    double rotation = 0,
+    Offset offset = Offset.zero,
+  }) {
     _aspectRatio = aspectRatio;
     _scale = scale;
-    _rotation = rotation;
     _offset = offset;
+    _horizontalShift =
+        rotation; // Utiliser rotation comme un décalage horizontal initial
   }
+
   double _aspectRatio = 1;
-  double _rotation = 0;
   double _scale = 1;
   Offset _offset = Offset.zero;
+  double _horizontalShift =
+      0; // Utilisé à la place de rotation pour le déplacement horizontal
   Future<ui.Image> Function(double pixelRatio)? _cropCallback;
 
   /// Gets the current aspect ratio.
@@ -37,12 +41,14 @@ class CropController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Gets the current rotation.
-  double get rotation => _rotation;
+  /// Gets the current horizontal shift (anciennement rotation).
+  double get rotation => _horizontalShift;
 
-  /// Sets the desired rotation.
+  /// Sets the desired horizontal shift.
   set rotation(double value) {
-    _rotation = value;
+    _horizontalShift = value;
+    _offset = Offset(
+        value, _offset.dy); // Appliquer le décalage horizontal à l'offset
     notifyListeners();
   }
 
@@ -58,39 +64,17 @@ class CropController extends ChangeNotifier {
   /// Gets the transformation matrix.
   Matrix4 get transform => Matrix4.identity()
     ..translate(_offset.dx, _offset.dy, 0)
-    ..rotateZ(_rotation)
     ..scale(_scale, _scale, 1);
 
   double _getMinScale() {
-    final r = vm.radians(_rotation % 360);
-    final rabs = r.abs();
-
-    final sinr = sin(rabs).abs();
-    final cosr = cos(rabs).abs();
-
-    final x = cosr * _aspectRatio + sinr;
-    final y = sinr * _aspectRatio + cosr;
-
-    final m = max(x / _aspectRatio, y);
-
-    return m;
+    return 1.0;
   }
 
   /// Capture an image of the current state of this widget and its children.
-  ///
-  /// The returned [ui.Image] has uncompressed raw RGBA bytes, will have
-  /// dimensions equal to the size of the [child] widget multiplied by [pixelRatio].
-  ///
-  /// The [pixelRatio] describes the scale between the logical pixels and the
-  /// size of the output image. It is independent of the
-  /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
-  /// will give you a 1:1 mapping between logical pixels and the output pixels
-  /// in the image.
   Future<ui.Image?> crop({double pixelRatio = 1}) {
     if (_cropCallback == null) {
       return Future.value(null);
     }
-
     return _cropCallback!.call(pixelRatio);
   }
 }
