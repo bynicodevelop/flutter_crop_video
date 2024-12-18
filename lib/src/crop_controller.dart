@@ -51,7 +51,7 @@ class CropController extends ChangeNotifier {
 
   /// Sets the desired offset.
   set offset(Offset value) {
-    _offset = Offset(value.dx, 0);
+    _offset = value;
     notifyListeners();
   }
 
