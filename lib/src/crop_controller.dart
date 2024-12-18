@@ -34,7 +34,7 @@ class CropController extends ChangeNotifier {
 
   /// Sets the desired scale.
   set scale(double value) {
-    _scale = max(value, 1);
+    _scale = value;
     notifyListeners();
   }
 
