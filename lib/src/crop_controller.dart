@@ -3,12 +3,11 @@ part of crop;
 /// The controller used to control the rotation, scale and actual cropping.
 class CropController extends ChangeNotifier {
   /// Constructor
-  CropController({
-    double aspectRatio = 1.0,
-    double scale = 1.0,
-    double rotation = 0,
-    Offset offset = Offset.zero
-  }) {
+  CropController(
+      {double aspectRatio = 1.0,
+      double scale = 1.0,
+      double rotation = 0,
+      Offset offset = Offset.zero}) {
     _aspectRatio = aspectRatio;
     _scale = scale;
     _rotation = rotation;
